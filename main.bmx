@@ -1,25 +1,9 @@
-Const w = 800
-Const h = 600
+Global w = 1366
+Global h = 768
 
 Graphics w,h
 
-Global mapLoaded = -1
-
-AutoMidHandle True 
-AutoImageFlags MASKEDIMAGE|MIPMAPPEDIMAGE
-
-Global grass_img:TImage = LoadImage:TImage("assets\tile\grass.png")
-Global dirt_img:TImage = LoadImage:TImage("assets\tile\dirt.png")
-Global water_img:TImage = LoadImage:TImage("assets\tile\water.png")
-
-
-SetMaskColor 255,0,255
-
-Global char_img:TImage = LoadAnimImage:TImage("assets\character\character.png",22,23,0,4)
-
-Global testmap[32,32]
-testmap[4,5] = 2
-
+AppTitle = "Tortle"
 
 ''console
 Global consoleopen = False
@@ -36,9 +20,7 @@ Global cursorblink
 Global cursorblinkrate = 120
 Global maxchars = 64
 
-
-''scale variables
-Global scale = 2
+Global leveleditor = False
 
 ''player variables
 Global xoffset:Float = 0.0
@@ -47,35 +29,59 @@ Global yoffset:Float = 0.0
 Global xvel:Float = 0.0
 Global yvel:Float = 0.0
 
+Global accel:Float = 0.2
+Global friction:Float = 0.91
 
-
-Global accel:Float = 0.08
-Global friction:Float = 0.9
+Global plr_angle:Float = 0
+Global angular_v:Float = 0.0
 
 Global canmove = False
 
 Global frame:Float = 0
+Global dir = 0
 
-Type consolechat
-	Field x
-	Field y
-	Field t:String
+Global mouselocked = False
 
-	Field r
-	Field g
-	Field b
-EndType
+Global scaledxoffset:Float
+Global scaledyoffset:Float
+
+Global zoom:Float = 1
+
+Global mouseshown = True
+
+''------
 
 Include "console.bmx"
 
-Global consolelist:TList = New TList
+init()
 
+Include "loadfiles.bmx"
+
+Global mapsizex = 32
+Global mapsizey = 32
+
+Global curmap:Int[,] = loadmap("assets\maps\lvl_1.lvl")
+Global curstuff:Int[,] = loadmap("assets\maps\lvl_1.stf")
+
+Global waterframe:Float = 0
+
+For x = 0 To mapsizex-1
+	For y = 0 To mapsizey-1
+		If curmap[x,y] = 9 Then
+			xoffset = -x*32+w/2
+			yoffset = -y*32+h/2
+			create_console_msg("Spawned player","command")
+		EndIf
+	Next
+Next
+
+
+''Global curmap[mapsizex,mapsizey]
+SetClsColor 135,206,250
 While Not KeyDown(KEY_ESCAPE)
 	Cls
-	
-	canmove = True 
-	
-	SetScale scale,scale
+		
+	canmove = True
 	
 	drawCurrentMap()
 	
@@ -83,74 +89,165 @@ While Not KeyDown(KEY_ESCAPE)
 		FlushKeys()
 		consoleopen = Not consoleopen
 	EndIf
-	
-	
+
 	player_draw()
-	
-	
-	SetScale 1,1
+		
 	If consoleopen Then 
 		console()
 		drawconsole()
 	EndIf
-	SetScale scale,scale
 	
 	player_control()
 	
+	SetScale zoom,zoom
 	Flip
 Wend
 End
 
+Function init()
+	create_console_msg("BEGIN LOG")
+EndFunction
+
+Function findchar:String(strin:String,count)
+	Return(Right(Left(strin,count),1))
+EndFunction
+
 Function player_draw()
-	DrawImage char_img,w/2,h/2,frame
+	SetRotation plr_angle
+	DrawImage char_img,w/2,h/2
+	SetRotation 0
+EndFunction
+
+Function Dist:Float(x1,y1,x2,y2)
+	Return
 EndFunction
 
 Function player_control()
 	If canmove Then
-		If KeyDown(KEY_W) Then
-			yvel = yvel + accel
-			frame = frame + 0.1
+		If KeyDown(KEY_O) And zoom > 1/3.0 Then
+			zoom = zoom * 0.99
 		EndIf
-		If KeyDown(KEY_A) Then
-			xvel = xvel + accel
-			frame = frame + 0.1
+		
+		If KeyDown(KEY_I) And zoom < 4 Then
+			zoom = zoom / 0.99
+		EndIf
+		
+		If mouselocked
+			If KeyDown(KEY_A) Then
+				angular_v = angular_v - accel
+			EndIf
+			If KeyDown(KEY_D) Then
+				angular_v = angular_v + accel
+			EndIf
+		Else
+			angular_v = 0
+			plr_angle = ATan2(h/2-MouseY(),w/2-MouseX())
+		EndIf
+		
+		
+		If KeyDown(KEY_W) Then
+			yvel = yvel + accel*Sin(plr_angle)
+			xvel = xvel + accel*Cos(plr_angle)
 		EndIf
 		If KeyDown(KEY_S) Then
-			yvel = yvel - accel
-			frame = frame + 0.1
+			yvel = yvel - accel*Sin(plr_angle)
+			xvel = xvel - accel*Cos(plr_angle)			
 		EndIf
-		If KeyDown(KEY_D) Then
-			xvel = xvel - accel
-			frame = frame + 0.1
+		
+		
+		If Not KeyDown(KEY_W) And Not KeyDown(KEY_A) And Not KeyDown(KEY_S) And Not KeyDown(KEY_D) Then
+			frame = 0
+		EndIf
+		
+		If KeyHit(KEY_SPACE) Then
+			mouselocked = Not mouselocked
+			mouseshown = Not mouseshown
 		EndIf
 	EndIf
+	
 	xoffset = xoffset + xvel
 	yoffset = yoffset + yvel
+
+	plr_angle = plr_angle + angular_v
 	
 	xvel = xvel * friction
 	yvel = yvel * friction
 	
-	If frame >= 4 Then frame = 0
+	angular_v = angular_v * friction
+	
+	scaledxoffset = xoffset*scale
+	scaledyoffset = xoffset*scale
+	
+	Select dir
+		Case 0
+			If frame >= 4 Then frame = 0
+		Default
+			If frame > 8 Then frame = 4
+			If frame <= 4 Then frame = 4
+	EndSelect
 EndFunction
 
 Function drawCurrentMap()
-	Local map[0,0]
+	waterframe = waterframe + 0.01
+	If waterframe > 3 Then waterframe = 0
+
+	For x = 0 To mapsizex-1
+		For y = 0 To mapsizey-1
+			
+			Local xpos:Float = (x*32+xoffset-w/2)*zoom+w/2
+			Local ypos:Float = (y*32+yoffset-h/2)*zoom+h/2
+			
+			If xpos < w+16*zoom And xpos > -16*zoom And ypos < h+16*zoom And ypos > -16*zoom Then
+				Select curmap[x,y]
+					Case 0
+						DrawImage grass_img,xpos,ypos
+					Case 1
+						DrawImage dirt_img,xpos,ypos
+					Case 2
+						DrawImage water_img,xpos,ypos,waterframe
+					Case 3
+						DrawImage water_img,xpos,ypos,waterframe
+						DrawImage grass_cc_img,xpos,ypos
+					Case 4
+						DrawImage water_img,xpos,ypos,waterframe
+						SetRotation -90
+						DrawImage grass_cc_img,xpos,ypos
+						SetRotation 0
+					Case 5
+						DrawImage water_img,xpos,ypos,waterframe
+						SetRotation 180
+						DrawImage grass_cc_img,xpos,ypos
+						SetRotation 0
+					Case 6
+						DrawImage water_img,xpos,ypos,waterframe
+						SetRotation 90
+						DrawImage grass_cc_img,xpos,ypos
+						SetRotation 0
 	
-	Select mapLoaded
-		Case -1
-			map = testmap
-	EndSelect
+					Case 7
+						DrawImage sand_img,xpos,ypos
+					Case 8
+						DrawImage path_img,xpos,ypos
 	
-	For x = 0 To 31
-		For y = 0 To 31
-			Select map[x,y]
-				Case 0
-					DrawImage grass_img,(x*32+xoffset)*scale,(y*32+yoffset)*scale
-				Case 1
-					DrawImage dirt_img,(x*32+xoffset)*scale,(y*32+yoffset)*scale
-				Case 2
-					DrawImage water_img,(x*32+xoffset)*scale,(y*32+yoffset)*scale
-			EndSelect
+					Case 9
+						DrawImage grass_img,xpos,ypos
+						DrawImage spawn_img,xpos,ypos
+					Default
+						DrawImage unknown_img,xpos,ypos
+				EndSelect
+								
+				Select curstuff[x,y]
+					Case 0
+					Case 1
+						DrawImage bush_img,xpos,ypos
+					Case 2
+						DrawImage tree_trunk_img,xpos,ypos
+					Case 3
+						DrawImage tree_trunk_top_img,xpos,ypos				
+					Default
+						DrawImage unknown_img,xpos,ypos
+				EndSelect
+			EndIf	
 		Next
 	Next
 EndFunction
