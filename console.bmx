@@ -1,13 +1,35 @@
+''Console
+Global consoleposy = h-220
+Global consoleposx = 0
+
+Type consolechat
+	Field x:Int
+	Field y:Int
+	Field t:String
+
+	Field r
+	Field g
+	Field b
+EndType
+
+Global consolelist:TList = New TList
+
+Function ParseText:String(txt:String,n:Int)
+	Local temp:String[] = txt.split(" ")
+	
+	Return temp[n-1]
+EndFunction
+
 Function create_console_msg(t:String,cmd_type:String = "")
 	If Len(t) <> 0 Then
-		For Local h:consolechat = EachIn consolelist
-			h.y = h.y - 15
+		For Local q:consolechat = EachIn consolelist
+			q.y = q.y - 15
 		Next
 
 		Local b:consolechat = New consolechat
 		b.t = t
-		b.x = 15
-		b.y = 165
+		b.x = consoleposx+15
+		b.y = consoleposy+165
 		
 		Select cmd_type
 			Case "error"
@@ -18,6 +40,14 @@ Function create_console_msg(t:String,cmd_type:String = "")
 				b.r = 64
 				b.g = 32
 				b.b = 255
+			Case "success"
+				b.r = 0
+				b.g = 255
+				b.b = 0
+			Case "warning"
+				b.r = 255
+				b.g = 255
+				b.b = 0
 			Default
 				b.r = 255
 				b.g = 255
@@ -28,32 +58,88 @@ Function create_console_msg(t:String,cmd_type:String = "")
 	EndIf
 EndFunction
 
+Function DrawText2(t:String,x,y,r,g,b)
+	SetColor 64,64,64
+	DrawText t,x+1,y+1
+	SetColor r,g,b
+	DrawText t,x,y
+	
+	SetColor 255,255,255
+EndFunction
+
+
 Function consolecommands()
 	Local response:String
 	Local cmd_type:String
 		
 	If lastcmd <> "" Then
-		Select Left(lastcmd,6)
-			Case "cheats"
-				If Right(lastcmd,1) = "1" Then 
-					cheatsenabled = True
+		Local args = Len(lastcmd.split(" "))
+		If args > 1 Then
+	
+			Select parsetext(lastcmd,1)
+				Case "cheats"
 					
+					If parsetext(lastcmd,2) = "1" Then 
+						cheatsenabled = True					
+						cmd_type = "command"
+					
+					ElseIf parsetext(lastcmd,2) = "0" Then 
+						cheatsenabled = False
+						cmd_type = "command"
+					
+					Else
+						response = "Invalid syntax for '"+lastcmd+"'"
+						cmd_type = "error"
+					
+					EndIf
+	
 					response = "Cheats set to "+cheatsenabled
-					cmd_type = "command"
-				ElseIf Right(lastcmd,1) = "0" Then 
-					cheatsenabled = False
+
+				Case "loadmap"
+					Local map[,] = loadmap(parsetext(lastcmd,2))
+					Local stuff[,] = loadmap(Left(parsetext(lastcmd,2),Len(parsetext(lastcmd,2))-3)+"stf")
+					
+					If map <> Null Then curmap = map
+					If stuff <> Null Then curstuff = stuff
 				
-					response = "Cheats set to "+cheatsenabled
-					cmd_type = "command"
-				Else
+				Case "tp"
+					If args = 2 Or args > 3 Then
+						response = "Invalid arguments for '"+lastcmd+"'"
+						cmd_type = "error"
+					ElseIf args = 3
+						If cheatsenabled Then
+							Local px = Int(parsetext(lastcmd,2))
+							Local py = Int(parsetext(lastcmd,3))
+							
+							xoffset = -px*32
+							yoffset = -py*32
+							response = "Teleported player to "+px+" "+py
+							cmd_type = "command"
+						Else
+							response = "You do not have permission to use this command"
+							cmd_type = "error"							
+						EndIf
+					EndIf
+								
+				Default
+					response = "Unknown command '"+lastcmd+"'"
+					cmd_type = "error"
+			EndSelect
+
+		Else
+			Select parsetext(lastcmd,1)
+				Case "cheats"
 					response = "Invalid syntax for '"+lastcmd+"'"
 					cmd_type = "error"
-				EndIf
-				
-			Default
-				response = "Unknown command '"+lastcmd+"'"
-				cmd_type = "error"
-		EndSelect
+				Case "loadmap"
+					response = "Invalid syntax for '"+lastcmd+"'"
+					cmd_type = "error"
+				Default
+					response = "Unknown command '"+lastcmd+"'"
+					cmd_type = "error"
+
+			EndSelect
+		EndIf
 	EndIf
 	
 	create_console_msg(response,cmd_type)
@@ -62,24 +148,23 @@ Function consolecommands()
 EndFunction
 
 Function drawconsole()
+	SetScale 1,1
 	SetColor 128,128,128
-	DrawRect 8,200,maxchars*TextWidth("W")+2,15
+	DrawRect consoleposx+8,consoleposy+200,maxchars*TextWidth("W")+2,15
 	
-	DrawRect 8,8,maxchars*TextWidth("W")+2,180
+	''DrawRect 8,0,maxchars*TextWidth("W")+2,188
 	
 	cursorblink = cursorblink - 1
 	If cursorblink <= 0 Then cursorblink = cursorblinkrate
 	
-	SetColor 255,255,255
 	If cursorblink < cursorblinkrate/2 Then
-	 	DrawText cmd+cursor,10,200
+	 	DrawText2 cmd+cursor,consoleposx+10,consoleposy+200,255,255,255
 	Else
-		DrawText cmd,10,200
+		DrawText2 cmd,consoleposx+10,consoleposy+200,255,255,255
 	EndIf
 
 	For c:consolechat = EachIn consolelist
-		SetColor c.r,c.g,c.b
-		DrawText c.t,c.x,c.y
+		DrawText2 c.t,c.x,c.y,c.r,c.g,c.b
 	Next
 	
 	SetColor 255,255,255
@@ -106,8 +191,8 @@ Function console:String()
 		lastcmd = cmd
 		cmd = ""
 		
-		For Local h:consolechat = EachIn consolelist
-			h.y = h.y - 15
+		For Local q:consolechat = EachIn consolelist
+			q.y = q.y - 15
 		Next
 				
 		Local b:consolechat = New consolechat
@@ -116,8 +201,8 @@ Function console:String()
 		b.b = 255
 		
 		b.t = lastcmd
-		b.x = 15
-		b.y = 165
+		b.x = consoleposx+15
+		b.y = consoleposy+165
 		consolelist.addlast(b)
 		
 		lastcmd = Trim(Lower(lastcmd))
@@ -125,5 +210,3 @@ Function console:String()
 		consolecommands()
 	EndIf
 EndFunction
-
-
