@@ -66,13 +66,14 @@ SetGNetString localPlayer,SLOT_CHAT,"Ready"
 SetGNetFloat localPlayer,SLOT_X,xoffset
 SetGNetFloat localPlayer,SLOT_Y,yoffset
 SetGNetFloat localPlayer,SLOT_ROT,plr_angle
-SetGNetInt localPlayer,SLOT_PORT,GAMEPORT
 
 SetGNetInt localPlayer,SLOT_R,plr_r
 SetGNetInt localPlayer,SLOT_G,plr_g
 SetGNetInt localPlayer,SLOT_B,plr_b
 
 Include "console.bmx"
+
+Print(HostIp(String(host)))
 
 init()
 
