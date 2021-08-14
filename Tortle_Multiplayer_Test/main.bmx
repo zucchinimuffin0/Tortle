@@ -22,7 +22,7 @@ Global friction:Float = 0.91
 Global plr_angle:Float = 0
 Global angular_v:Float = 0.0
 
-Global plr_name:String = "guest"
+Global plr_name:String = "Guest"
 
 Global canmove = False
 
@@ -35,8 +35,12 @@ Global zoom:Float = 1
 
 Global mouseshown = True
 
+Global plr_R = 255
+Global plr_G = 255
+Global plr_B = 255
+
 ''------
-Const GAMEPORT=12345
+Global GAMEPORT=31415
 
 Const SLOT_TYPE=0
 Const SLOT_NAME=1
@@ -48,6 +52,10 @@ Const SLOT_VY=6
 Const SLOT_ROT=7
 Const SLOT_TIMEOUT=8
 Const SLOT_AV = 9
+Const SLOT_R = 10
+Const SLOT_G = 11
+Const SLOT_B = 12
+Const SLOT_PORT = 13
 
 Global host:TGNetHost=CreateGNetHost()
 
@@ -58,6 +66,10 @@ SetGNetString localPlayer,SLOT_CHAT,"Ready"
 SetGNetFloat localPlayer,SLOT_X,xoffset
 SetGNetFloat localPlayer,SLOT_Y,yoffset
 SetGNetFloat localPlayer,SLOT_ROT,plr_angle
+
+SetGNetInt localPlayer,SLOT_R,plr_r
+SetGNetInt localPlayer,SLOT_G,plr_g
+SetGNetInt localPlayer,SLOT_B,plr_b
 
 Include "console.bmx"
 
@@ -118,6 +130,7 @@ CloseGNetHost host
 
 End
 
+
 Function init()
 	create_console_msg("BEGIN LOG")
 EndFunction
@@ -127,18 +140,26 @@ Function findchar:String(strin:String,count)
 EndFunction
 
 Function player_draw()
-	For Local obj:TGNetObject=EachIn GNetObjects( host )
+	For Local obj:TGNetObject=EachIn GNetObjects(host)
 		If obj.State()=GNET_CLOSED Continue
 
-		Local xp#=GetGNetFloat( obj,SLOT_X )
-		Local yp#=GetGNetFloat( obj,SLOT_Y )
-		Local rot#=GetGNetFloat( obj,SLOT_ROT )
-		Local name:String = GetGNetString( obj,SLOT_NAME )
+		Local xp#=GetGNetFloat(obj,SLOT_X)
+		Local yp#=GetGNetFloat(obj,SLOT_Y)
+		Local rot#=GetGNetFloat(obj,SLOT_ROT)
+		Local name:String = GetGNetString(obj,SLOT_NAME)
+		Local r:Int = GetGNetInt(obj,SLOT_R)
+		Local g:Int = GetGNetInt(obj,SLOT_G)
+		Local b:Int = GetGNetInt(obj,SLOT_B)
+		
 		SetRotation rot
+		
+		SetColor r,g,b
 		DrawImage char_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
+		
 		SetRotation 0
 		DrawText name,(xoffset-xp)*zoom+w/2-(TextWidth(name)*zoom)/2,(yoffset-yp)*zoom+h/2-(TextHeight(name)*zoom*2)
 	Next
+	SetColor 255,255,255
 EndFunction
 
 Function Dist:Float(x1,y1,x2,y2)

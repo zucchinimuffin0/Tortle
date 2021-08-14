@@ -93,7 +93,7 @@ Function consolecommands()
 		Local args = Len(lastcmd.split(" "))
 		If args > 1 Then
 	
-			Select parsetext(lastcmd,1)
+			Select Lower(parsetext(lastcmd,1))
 				Case "cheats"
 					
 					If parsetext(lastcmd,2) = "1" Then 
@@ -138,22 +138,64 @@ Function consolecommands()
 						EndIf
 					EndIf
 				Case "connect"
-					If Not GNetConnect( host,parsetext(lastcmd,2),GAMEPORT) Then
-						response = "Connect failed"
+					If Not GNetConnect( host,"localhost",Int(parsetext(lastcmd,2))) Then
+						response = "Failed to connect to server"
 						cmd_type = "error"
 					EndIf
 				Case "setname"
 						If Len(parsetext(lastcmd,2)) < 20 Then
-							plr_name = parsetext(lastcmd,2)						
-
-							SetGNetString localPlayer,SLOT_NAME,plr_name
-						
-							response = "Set name to "+parsetext(lastcmd,2)
-							cmd_type = "command"
+							
+							Local c = 0
+							
+							For i = 0 To Len(parsetext(lastcmd,2))
+								Select findchar(parsetext(lastcmd,2),i)
+									Case "/",";",",","|"
+										c = c + 1
+								EndSelect
+							Next
+							
+							If c = 0 Then
+								plr_name = parsetext(lastcmd,2)						
+								SetGNetString localPlayer,SLOT_NAME,plr_name
+									
+								response = "Set name to "+parsetext(lastcmd,2)
+								cmd_type = "command"
+							Else
+								response = "Name cannot contain special characters"
+								cmd_type = "error"
+							EndIf
+							
 						Else
 							response = "Names can only be max 20 characters"
 							cmd_type = "error"
-						EndIf			
+						EndIf
+				Case "setcolor"
+					If args = 4 Then
+						Local pr = Byte(parsetext(lastcmd,2))
+						Local pg = Byte(parsetext(lastcmd,3))
+						Local pb = Byte(parsetext(lastcmd,4))
+						
+						plr_r = pr
+						plr_g = pg
+						plr_b = pb
+						
+						SetGNetInt localPlayer,SLOT_R,plr_r
+						SetGNetInt localPlayer,SLOT_G,plr_g
+						SetGNetInt localPlayer,SLOT_B,plr_b
+						
+					EndIf
+				Case "listen"
+					If Int(parsetext(lastcmd,2)) > 9999 And Int(parsetext(lastcmd,2) < 99999)
+						GAMEPORT = Int(parsetext(lastcmd,2))
+						If Not GNetListen(host,GAMEPORT) Then
+							response = "Listen failed"
+							cmd_type = "error"
+						Else
+							response = "Hosting on port "+GAMEPORT
+							cmd_type = "success"
+						EndIf
+					EndIf
+							
 				Default
 					response = "Unknown command '"+lastcmd+"'"
 					cmd_type = "error"
@@ -161,7 +203,7 @@ Function consolecommands()
 			EndSelect
 
 		Else
-			Select parsetext(lastcmd,1)
+			Select Lower(parsetext(lastcmd,1))
 				Case "cheats"
 					response = "Invalid syntax for '"+lastcmd+"'"
 					cmd_type = "error"
@@ -177,10 +219,12 @@ Function consolecommands()
 					EndIf
 				Case "connect"
 					If Not GNetConnect(host,"localhost",GAMEPORT) Then
-						response = "Connect failed"
-						cmd_type = "error"
+						response = "Failed to connect to server"
+						cmd_type = "error"				
 					EndIf
-					
+				Case "setname"
+					response = "You must supply a name"
+					cmd_type = "error"
 				Default
 					response = "Unknown command '"+lastcmd+"'"
 					cmd_type = "error"
@@ -252,7 +296,7 @@ Function console:String()
 		b.y = consoleposy+165
 		consolelist.addlast(b)
 		
-		lastcmd = Trim(Lower(lastcmd))
+		lastcmd = Trim((lastcmd))
 		
 		consolecommands()
 	EndIf
