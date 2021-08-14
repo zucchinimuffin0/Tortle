@@ -139,8 +139,8 @@ Function consolecommands()
 					EndIf
 				Case "connect"
 					
-					If args > 2 Then
-						If Not GNetConnect( host,parsetext(lastcmd,3),Int(parsetext(lastcmd,2))) Then
+					If args = 3 Then
+						If Not GNetConnect( host,parsetext(lastcmd,2),Int(parsetext(lastcmd,3))) Then
 							response = "Failed to connect to server"
 							cmd_type = "error"
 						EndIf
