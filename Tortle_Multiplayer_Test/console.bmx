@@ -142,6 +142,18 @@ Function consolecommands()
 						response = "Connect failed"
 						cmd_type = "error"
 					EndIf
+				Case "setname"
+						If Len(parsetext(lastcmd,2)) < 20 Then
+							plr_name = parsetext(lastcmd,2)						
+
+							SetGNetString localPlayer,SLOT_NAME,plr_name
+						
+							response = "Set name to "+parsetext(lastcmd,2)
+							cmd_type = "command"
+						Else
+							response = "Names can only be max 20 characters"
+							cmd_type = "error"
+						EndIf			
 				Default
 					response = "Unknown command '"+lastcmd+"'"
 					cmd_type = "error"
@@ -159,12 +171,12 @@ Function consolecommands()
 					cmd_type = "error"
 					
 				Case "listen"
-					If Not GNetListen( host,GAMEPORT ) Then
+					If Not GNetListen(host,GAMEPORT ) Then
 						response = "Listen failed"
 						cmd_type = "error"					
 					EndIf
 				Case "connect"
-					If Not GNetConnect( host,"localhost",GAMEPORT) Then
+					If Not GNetConnect(host,"localhost",GAMEPORT) Then
 						response = "Connect failed"
 						cmd_type = "error"
 					EndIf

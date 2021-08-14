@@ -137,6 +137,18 @@ Function consolecommands()
 							cmd_type = "error"							
 						EndIf
 					EndIf
+				Case "connect"
+					If Not GNetConnect( host,parsetext(lastcmd,2),GAMEPORT) Then
+						response = "Connect failed"
+						cmd_type = "error"
+					EndIf
+				Case "setname"
+						plr_name = parsetext(lastcmd,2)						
+
+						SetGNetString localPlayer,SLOT_NAME,plr_name
+						
+						response = "Set name to "+parsetext(lastcmd,2)
+						cmd_type = "command"					
 				Default
 					response = "Unknown command '"+lastcmd+"'"
 					cmd_type = "error"
@@ -154,9 +166,14 @@ Function consolecommands()
 					cmd_type = "error"
 					
 				Case "listen"
-					If Not GNetListen( host,GAMEPORT ) Then
+					If Not GNetListen(host,GAMEPORT ) Then
 						response = "Listen failed"
 						cmd_type = "error"					
+					EndIf
+				Case "connect"
+					If Not GNetConnect(host,"localhost",GAMEPORT) Then
+						response = "Connect failed"
+						cmd_type = "error"
 					EndIf
 					
 				Default

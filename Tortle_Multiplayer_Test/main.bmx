@@ -1,8 +1,8 @@
 Import BRL.GNet
 Import BRL.BASIC
 
-Global w = 800
-Global h = 600
+Global w = 640
+Global h = 480
 
 Graphics w,h
 
@@ -21,6 +21,8 @@ Global friction:Float = 0.91
 
 Global plr_angle:Float = 0
 Global angular_v:Float = 0.0
+
+Global plr_name:String = "guest"
 
 Global canmove = False
 
@@ -51,8 +53,7 @@ Global host:TGNetHost=CreateGNetHost()
 
 Global localPlayer:TGNetObject=CreateGNetObject(host)
 
-SetGNetString localPlayer,SLOT_TYPE,"player"
-SetGNetString localPlayer,SLOT_NAME,playerName
+SetGNetString localPlayer,SLOT_NAME,plr_name
 SetGNetString localPlayer,SLOT_CHAT,"Ready"
 SetGNetFloat localPlayer,SLOT_X,xoffset
 SetGNetFloat localPlayer,SLOT_Y,yoffset
@@ -97,7 +98,6 @@ While Not KeyDown(KEY_ESCAPE)
 		consoleopen = Not consoleopen
 	EndIf
 
-	player_draw()
 		
 	If consoleopen Then 
 		console()
@@ -106,22 +106,10 @@ While Not KeyDown(KEY_ESCAPE)
 
 	GNetSync host
 
+	player_draw()
 	
 	player_control()
 
-	
-	For Local obj:TGNetObject=EachIn GNetObjects( host )
-		If obj.State()=GNET_CLOSED Continue
-
-		Local xp#=GetGNetFloat( obj,SLOT_X )
-		Local yp#=GetGNetFloat( obj,SLOT_Y )
-		Local rot#=GetGNetFloat( obj,SLOT_ROT )
-		
-		SetRotation rot
-		DrawImage char_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
-		SetRotation 0
-	Next
-	
 	SetScale zoom,zoom
 	Flip
 Wend
@@ -139,9 +127,18 @@ Function findchar:String(strin:String,count)
 EndFunction
 
 Function player_draw()
-	SetRotation plr_angle
-	''DrawImage char_img,w/2,h/2
-	SetRotation 0
+	For Local obj:TGNetObject=EachIn GNetObjects( host )
+		If obj.State()=GNET_CLOSED Continue
+
+		Local xp#=GetGNetFloat( obj,SLOT_X )
+		Local yp#=GetGNetFloat( obj,SLOT_Y )
+		Local rot#=GetGNetFloat( obj,SLOT_ROT )
+		Local name:String = GetGNetString( obj,SLOT_NAME )
+		SetRotation rot
+		DrawImage char_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
+		SetRotation 0
+		DrawText name,(xoffset-xp)*zoom+w/2-(TextWidth(name)*zoom)/2,(yoffset-yp)*zoom+h/2-(TextHeight(name)*zoom*2)
+	Next
 EndFunction
 
 Function Dist:Float(x1,y1,x2,y2)
