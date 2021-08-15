@@ -88,13 +88,15 @@ EndFunction
 Function consolecommands()
 	Local response:String
 	Local cmd_type:String
-		
+	
 	If lastcmd <> "" Then
 		Local args = Len(lastcmd.split(" "))
+		''if parsetext(lastcmd,1)
 		If args > 1 Then
 	
 			Select Lower(parsetext(lastcmd,1))
-				Case "cheats"
+				
+				Case "/cheats"
 					
 					If parsetext(lastcmd,2) = "1" Then 
 						cheatsenabled = True					
@@ -112,14 +114,15 @@ Function consolecommands()
 	
 					response = "Cheats set to "+cheatsenabled
 
-				Case "loadmap"
+
+	 			Case "/loadmap"
 					Local map[,] = loadmap(parsetext(lastcmd,2))
 					Local stuff[,] = loadmap(Left(parsetext(lastcmd,2),Len(parsetext(lastcmd,2))-3)+"stf")
 					
 					If map <> Null Then curmap = map
 					If stuff <> Null Then curstuff = stuff
-				
-				Case "tp"
+										
+				Case "/tp"
 					If args = 2 Or args > 3 Then
 						response = "Invalid arguments for '"+lastcmd+"'"
 						cmd_type = "error"
@@ -137,17 +140,21 @@ Function consolecommands()
 							cmd_type = "error"							
 						EndIf
 					EndIf
-				Case "connect"
+
+				Case "/connect"
 					
 					If args = 3 Then
-						If Not GNetConnect( host,parsetext(lastcmd,2),Int(parsetext(lastcmd,3))) Then
+						If Not GNetConnect(host,parsetext(lastcmd,2),Int(parsetext(lastcmd,3))) Then
 							response = "Failed to connect to server"
 							cmd_type = "error"
+						Else
+							response = "Connected to server "+parsetext(lastcmd,2)+" at port "+parsetext(lastcmd,3)
+							cmd_type = "success"					
 						EndIf
 					EndIf
 				
 				
-				Case "setname"
+				Case "/setname"
 						If Len(parsetext(lastcmd,2)) < 20 Then
 							
 							Local c = 0
@@ -174,7 +181,8 @@ Function consolecommands()
 							response = "Names can only be max 20 characters"
 							cmd_type = "error"
 						EndIf
-				Case "setcolor"
+
+				Case "/setcolor"
 					If args = 4 Then
 						Local pr = Byte(parsetext(lastcmd,2))
 						Local pg = Byte(parsetext(lastcmd,3))
@@ -189,11 +197,11 @@ Function consolecommands()
 						SetGNetInt localPlayer,SLOT_B,plr_b
 						
 					EndIf
-				Case "listen"
+				Case "/listen"
 					If Int(parsetext(lastcmd,2)) > 9999 And Int(parsetext(lastcmd,2) < 99999)
 						GAMEPORT = Int(parsetext(lastcmd,2))
 						If Not GNetListen(host,GAMEPORT) Then
-							response = "Listen failed"
+							response = "Hosting failed"
 							cmd_type = "error"
 						Else
 							response = "Hosting on port "+GAMEPORT
@@ -202,37 +210,48 @@ Function consolecommands()
 					EndIf
 							
 				Default
-					response = "Unknown command '"+lastcmd+"'"
-					cmd_type = "error"
+					If Left(parsetext(lastcmd,1),1) = "/" Then
+						response = "Unknown command '"+lastcmd+"'"
+						cmd_type = "error"
+					EndIf
+
 
 			EndSelect
 
 		Else
+
 			Select Lower(parsetext(lastcmd,1))
-				Case "cheats"
+				Case "/cheats"
 					response = "Invalid syntax for '"+lastcmd+"'"
 					cmd_type = "error"
 					
-				Case "loadmap"
+				Case "/loadmap"
 					response = "Invalid syntax for '"+lastcmd+"'"
 					cmd_type = "error"
 					
-				Case "listen"
-					If Not GNetListen(host,GAMEPORT ) Then
-						response = "Listen failed"
-						cmd_type = "error"					
+				Case "/listen"
+					If Not GNetListen(host,GAMEPORT) Then
+						response = "Hosting failed"
+						cmd_type = "error"
+					Else
+						response = "Hosting on port "+GAMEPORT
+						cmd_type = "success"
 					EndIf
-				Case "connect"
+					
+				Case "/connect"
 					If Not GNetConnect(host,"localhost",GAMEPORT) Then
 						response = "Failed to connect to server"
 						cmd_type = "error"				
 					EndIf
-				Case "setname"
+					
+				Case "/setname"
 					response = "You must supply a name"
 					cmd_type = "error"
 				Default
-					response = "Unknown command '"+lastcmd+"'"
-					cmd_type = "error"
+					If Left(parsetext(lastcmd,1),1) = "/" Then
+						response = "Unknown command '"+lastcmd+"'"
+						cmd_type = "error"				
+					EndIf
 
 			EndSelect
 		EndIf
@@ -296,7 +315,11 @@ Function console:String()
 		b.g = 255
 		b.b = 255
 		
-		b.t = lastcmd
+		Local chat:String = plr_name+": "+lastcmd
+		
+		SetGNetString(localPlayer,SLOT_CHAT,chat)
+		
+		b.t = chat
 		b.x = consoleposx+15
 		b.y = consoleposy+165
 		consolelist.addlast(b)
@@ -306,5 +329,3 @@ Function console:String()
 		consolecommands()
 	EndIf
 EndFunction
-
-

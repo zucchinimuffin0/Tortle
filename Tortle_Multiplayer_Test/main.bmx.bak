@@ -50,19 +50,18 @@ Const SLOT_Y=4
 Const SLOT_VX=5
 Const SLOT_VY=6
 Const SLOT_ROT=7
-Const SLOT_TIMEOUT=8
-Const SLOT_AV = 9
-Const SLOT_R = 10
-Const SLOT_G = 11
-Const SLOT_B = 12
-Const SLOT_PORT = 13
+Const SLOT_AV = 8
+Const SLOT_R = 9
+Const SLOT_G = 10
+Const SLOT_B = 11
+Const SLOT_MAP = 12
 
 Global host:TGNetHost=CreateGNetHost()
 
 Global localPlayer:TGNetObject=CreateGNetObject(host)
 
 SetGNetString localPlayer,SLOT_NAME,plr_name
-SetGNetString localPlayer,SLOT_CHAT,"Ready"
+
 SetGNetFloat localPlayer,SLOT_X,xoffset
 SetGNetFloat localPlayer,SLOT_Y,yoffset
 SetGNetFloat localPlayer,SLOT_ROT,plr_angle
@@ -71,9 +70,8 @@ SetGNetInt localPlayer,SLOT_R,plr_r
 SetGNetInt localPlayer,SLOT_G,plr_g
 SetGNetInt localPlayer,SLOT_B,plr_b
 
-Include "console.bmx"
 
-Print(HostIp(String(host)))
+Include "console.bmx"
 
 init()
 
@@ -112,6 +110,8 @@ While Not KeyDown(KEY_ESCAPE)
 		consoleopen = Not consoleopen
 	EndIf
 
+	player_draw()
+
 		
 	If consoleopen Then 
 		console()
@@ -120,7 +120,6 @@ While Not KeyDown(KEY_ESCAPE)
 
 	GNetSync host
 
-	player_draw()
 	
 	player_control()
 
@@ -243,7 +242,7 @@ EndFunction
 Function drawCurrentMap()
 	waterframe = waterframe + 0.01
 	If waterframe > 3 Then waterframe = 0
-
+		
 	For x = 0 To mapsizex-1
 		For y = 0 To mapsizey-1
 			
