@@ -61,6 +61,7 @@ Global host:TGNetHost=CreateGNetHost()
 Global localPlayer:TGNetObject=CreateGNetObject(host)
 
 SetGNetString localPlayer,SLOT_NAME,plr_name
+SetGNetString localPlayer,SLOT_CHAT,""
 
 SetGNetFloat localPlayer,SLOT_X,xoffset
 SetGNetFloat localPlayer,SLOT_Y,yoffset

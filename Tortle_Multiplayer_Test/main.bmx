@@ -29,7 +29,7 @@ Global canmove = False
 Global frame:Float = 0
 Global dir = 0
 
-Global mouselocked = False
+Global mouselocked = true
 
 Global zoom:Float = 1
 
