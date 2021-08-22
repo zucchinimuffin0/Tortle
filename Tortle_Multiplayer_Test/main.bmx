@@ -8,7 +8,6 @@ AppTitle = "Tortle 1.0"
 
 Graphics w,h,0
 
-
 ''player variables
 Global xoffset:Float = 0.0
 Global yoffset:Float = 0.0
@@ -31,7 +30,7 @@ Global dir = 0
 
 Global mouselocked = True
 
-Global zoom:Float = 1
+Global zoom:Float = 2
 
 Global mouseshown = True
 
@@ -105,6 +104,8 @@ SetImageFont font2
 
 While Not KeyDown(KEY_ESCAPE)
 	Cls
+	
+	mousestate = 0
 	canmove = True
 	
 	drawCurrentMap()
@@ -127,6 +128,16 @@ While Not KeyDown(KEY_ESCAPE)
 	
 	player_control()
 
+	SetScale 1,1
+	Select mousestate
+		Case 0
+			DrawImage cursor1_img,MouseX(),MouseY()
+		Case 1
+			DrawImage cursor2_img,MouseX(),MouseY()
+		Case 2
+			DrawImage cursor3_img,MouseX(),MouseY()
+	EndSelect
+	
 	SetScale zoom,zoom
 	Flip
 Wend
@@ -155,6 +166,8 @@ Function player_draw()
 		Local r:Int = GetGNetInt(obj,SLOT_R)
 		Local g:Int = GetGNetInt(obj,SLOT_G)
 		Local b:Int = GetGNetInt(obj,SLOT_B)
+	
+		Local text:String = GetGNetString(obj,SLOT_CHAT)
 		
 		SetRotation rot
 		
@@ -162,13 +175,18 @@ Function player_draw()
 		DrawImage char_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
 		
 		SetRotation 0
+		SetImageFont Null
 		DrawText name,(xoffset-xp)*zoom+w/2-(TextWidth(name)*zoom)/2,(yoffset-yp)*zoom+h/2-(TextHeight(name)*zoom*2)
+		
+		create_console_msg(text)
+		
+		SetGNetString(obj,SLOT_CHAT,"")
 	Next
 	SetColor 255,255,255
 EndFunction
 
-Function Dist:Float(x1,y1,x2,y2)
-	Return
+Function Dist:Float(x1:Float,y1:Float,x2:Float,y2:Float)
+	Return( Sqr( (x1*x2)-(y1*y2) ) )
 EndFunction
 
 Function player_control()
@@ -181,7 +199,7 @@ Function player_control()
 			zoom = zoom / 0.99
 		EndIf
 		
-		If mouselocked
+		If mouselocked Then
 			If KeyDown(KEY_A) Then
 				angular_v = angular_v - accel
 			EndIf
@@ -189,6 +207,7 @@ Function player_control()
 				angular_v = angular_v + accel
 			EndIf			
 		Else
+			mousestate = 1
 			angular_v = 0
 			plr_angle = ATan2(h/2-MouseY(),w/2-MouseX())
 		EndIf

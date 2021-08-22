@@ -76,6 +76,7 @@ Function create_console_msg(t:String,cmd_type:String = "")
 EndFunction
 
 Function DrawText2(t:String,x,y,r,g,b)
+	SetImageFont Null
 	SetColor 64,64,64
 	DrawText t,x+1,y+1
 	SetColor r,g,b
@@ -306,23 +307,23 @@ Function console:String()
 		lastcmd = cmd
 		cmd = ""
 		
-		For Local q:consolechat = EachIn consolelist
-			q.y = q.y - 15
-		Next
+		''For Local q:consolechat = EachIn consolelist
+		''	q.y = q.y - 15
+		''Next
 				
-		Local b:consolechat = New consolechat
-		b.r = 255
-		b.g = 255
-		b.b = 255
+		''Local b:consolechat = New consolechat
+		''b.r = 255
+		''b.g = 255
+		''b.b = 255
 		
 		Local chat:String = plr_name+": "+lastcmd
 		
 		SetGNetString(localPlayer,SLOT_CHAT,chat)
 		
-		b.t = chat
-		b.x = consoleposx+15
-		b.y = consoleposy+165
-		consolelist.addlast(b)
+		''b.t = chat
+		''b.x = consoleposx+15
+		''b.y = consoleposy+165
+		''consolelist.addlast(b)
 		
 		lastcmd = Trim((lastcmd))
 		

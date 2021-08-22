@@ -26,9 +26,15 @@ Global char_img:TImage = LoadImage2:TImage("assets\character\character.png")
 
 Global button_img:TImage = LoadImage2:TImage("assets\button.png")
 
+
+
 Global cursor1_img:TImage = LoadImage2:TImage("assets\cursor1.png")
+SetImageHandle cursor1_img,0,0
+
 Global cursor2_img:TImage = LoadImage2:TImage("assets\cursor2.png")
+
 Global cursor3_img:TImage = LoadImage2:TImage("assets\cursor3.png")
+SetImageHandle cursor3_img,6,0
 
 Global tester_img:TImage = LoadImage2:TImage("assets\tester.png")
 
