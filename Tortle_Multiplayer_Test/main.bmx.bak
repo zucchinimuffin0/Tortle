@@ -1,12 +1,12 @@
 Import BRL.GNet
 Import BRL.BASIC
 
-Global w = 640
-Global h = 480
-
-Graphics w,h
+Global w = 800
+Global h = 600
 
 AppTitle = "Tortle"
+
+Graphics w,h,0
 
 
 ''player variables
@@ -29,7 +29,7 @@ Global canmove = False
 Global frame:Float = 0
 Global dir = 0
 
-Global mouselocked = False
+Global mouselocked = True
 
 Global zoom:Float = 1
 
@@ -78,6 +78,9 @@ init()
 
 Include "loadfiles.bmx"
 
+Include "mainmenu.bmx"
+
+
 Global mapsizex = 32
 Global mapsizey = 32
 
@@ -98,10 +101,10 @@ Next
 
 
 ''Global curmap[mapsizex,mapsizey]
-SetClsColor 135,206,250
+SetImageFont font2
+
 While Not KeyDown(KEY_ESCAPE)
 	Cls
-		
 	canmove = True
 	
 	drawCurrentMap()

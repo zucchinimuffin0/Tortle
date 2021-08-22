@@ -16,11 +16,25 @@ Global bush_img:TImage = LoadImage2:TImage("assets\tile\bush.png")
 Global tree_trunk_img:TImage = LoadImage2:TImage("assets\tile\tree_trunk.png")
 Global tree_trunk_top_img:TImage = LoadImage2:TImage("assets\tile\tree_trunk_top.png")
 
-
+Global title_img:TImage = LoadImage2:TImage("assets\title.png")
 
 Global unknown_img:TImage = LoadImage2:TImage("assets\tile\missing.png")
 
 Global char_img:TImage = LoadImage2:TImage("assets\character\character.png")
+
+
+
+Global button_img:TImage = LoadImage2:TImage("assets\button.png")
+
+Global cursor1_img:TImage = LoadImage2:TImage("assets\cursor1.png")
+Global cursor2_img:TImage = LoadImage2:TImage("assets\cursor2.png")
+Global cursor3_img:TImage = LoadImage2:TImage("assets\cursor3.png")
+
+Global tester_img:TImage = LoadImage2:TImage("assets\tester.png")
+
+Global font = LoadImageFont2("assets\font\Deadly Advance.ttf",14)
+
+Global font2 = LoadImageFont2("assets\font\Deadly Advance.ttf",14)
 
 
 ''Global char_img:TImage = LoadAnimImage2:TImage("assets\character\character.png",22,23,0,8)
@@ -45,6 +59,16 @@ Function LoadAnimImage2:TImage(url:Object,cell_width,cell_height,first_cell,cell
 		create_console_msg("Couldn't load image '"+String(url)+"', file not found","error")
 	EndIf
 EndFunction
+
+Function LoadImageFont2:TimageFont(url:Object,size,style = SMOOTHFONT)
+	If LoadImageFont(url:Object,size,style = SMOOTHFONT) <> Null Then
+		create_console_msg("Loaded font "+String(url),"success")
+		Return LoadImageFont(url:Object,size,style = SMOOTHFONT)
+	Else
+		create_console_msg("Couldn't load font '"+String(url)+"', file not found","error")
+	EndIf
+EndFunction
+
 
 Function LoadMap:Int[,](dir:Object,sizex = 32,sizey = 32)	
 	Local f = OpenStream(dir)
