@@ -1,5 +1,7 @@
-AutoImageFlags MASKEDIMAGE|MIPMAPPEDIMAGE
+AutoImageFlags MIPMAPPEDIMAGE|MASKEDIMAGED
 AutoMidHandle True 
+
+
 Global grass_img:TImage = LoadImage2:TImage("assets\tile\grass.png")
 Global grass_cc_img:TImage = LoadImage2:TImage("assets\tile\grass_concave.png")
 Global grass_cv_img:TImage = LoadImage2:TImage("assets\tile\grass_convex.png")
@@ -21,7 +23,10 @@ Global title_img:TImage = LoadImage2:TImage("assets\title.png")
 Global unknown_img:TImage = LoadImage2:TImage("assets\tile\missing.png")
 
 Global char_img:TImage = LoadImage2:TImage("assets\character\character.png")
+Global eyes_img:TImage = LoadImage2:TImage("assets\character\eyes.png")
 
+Global smile0_img:TImage = LoadImage2:TImage("assets\character\smile0.png")
+Global smile1_img:TImage = LoadImage2:TImage("assets\character\smile1.png")
 
 
 Global button_img:TImage = LoadImage2:TImage("assets\button.png")
@@ -40,7 +45,7 @@ Global tester_img:TImage = LoadImage2:TImage("assets\tester.png")
 
 Global font = LoadImageFont2("assets\font\Deadly Advance.ttf",14)
 
-Global font2 = LoadImageFont2("assets\font\Deadly Advance.ttf",14)
+Global font2 = LoadImageFont2("assets\font\Deadly Advance.ttf",18)
 
 
 ''Global char_img:TImage = LoadAnimImage2:TImage("assets\character\character.png",22,23,0,8)

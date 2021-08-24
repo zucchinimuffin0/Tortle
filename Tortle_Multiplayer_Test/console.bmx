@@ -37,7 +37,7 @@ Function ParseText:String(txt:String,n:Int)
 	Return temp[n-1]
 EndFunction
 
-Function create_console_msg(t:String,cmd_type:String = "")
+Function create_console_msg(t:String,cmd_type:String = "",c = False, r = 255,g = 255,blue = 255)
 	If Len(t) <> 0 Then
 		For Local q:consolechat = EachIn consolelist
 			q.y = q.y - 15
@@ -48,28 +48,34 @@ Function create_console_msg(t:String,cmd_type:String = "")
 		b.x = consoleposx+15
 		b.y = consoleposy+165
 		
-		Select cmd_type
-			Case "error"
-				b.r = 255
-				b.g = 0
-				b.b = 0
-			Case "command"
-				b.r = 64
-				b.g = 32
-				b.b = 255
-			Case "success"
-				b.r = 0
-				b.g = 255
-				b.b = 0
-			Case "warning"
-				b.r = 255
-				b.g = 255
-				b.b = 0
-			Default
-				b.r = 255
-				b.g = 255
-				b.b = 255		
-		EndSelect
+		If c = False Then
+			Select cmd_type
+				Case "error"
+					b.r = 255
+					b.g = 0
+					b.b = 0
+				Case "command"
+					b.r = 64
+					b.g = 32
+					b.b = 255
+				Case "success"
+					b.r = 0
+					b.g = 255
+					b.b = 0
+				Case "warning"
+					b.r = 255
+					b.g = 255
+					b.b = 0
+				Default
+					b.r = 255
+					b.g = 255
+					b.b = 255		
+			EndSelect
+		Else
+			b.r = r
+			b.g = g
+			b.b = blue
+		EndIf
 				
 		consolelist.addlast(b)
 	EndIf
@@ -318,7 +324,7 @@ Function console:String()
 		
 		Local chat:String = plr_name+": "+lastcmd
 		
-		SetGNetString(localPlayer,SLOT_CHAT,chat)
+		If lastcmd[..1] <> "/" Then SetGNetString(localPlayer,SLOT_CHAT,chat)
 		
 		''b.t = chat
 		''b.x = consoleposx+15
@@ -328,5 +334,5 @@ Function console:String()
 		lastcmd = Trim((lastcmd))
 		
 		consolecommands()
-	EndIf
+	EndIf	
 EndFunction

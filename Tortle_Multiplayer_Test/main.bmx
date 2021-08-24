@@ -21,7 +21,7 @@ Global friction:Float = 0.91
 Global plr_angle:Float = 0
 Global angular_v:Float = 0.0
 
-Global plr_name:String = "Guest"
+Global plr_name:String = ""
 
 Global canmove = False
 
@@ -118,10 +118,13 @@ While Not KeyDown(KEY_ESCAPE)
 	player_draw()
 
 		
-	If consoleopen Then 
+	If consoleopen Then
+		chat()
+
 		console()
 		drawconsole()
 	EndIf
+	
 
 	GNetSync host
 
@@ -146,6 +149,24 @@ CloseGNetHost host
 
 End
 
+Function Chat()
+	For Local obj:TGNetObject=EachIn GNetObjects(host)
+		If obj.State()=GNET_CLOSED Continue
+			
+		Local text:String = GetGNetString(obj,SLOT_CHAT)
+	
+		Local r:Int = GetGNetInt(obj,SLOT_R)
+		Local g:Int = GetGNetInt(obj,SLOT_G)
+		Local b:Int = GetGNetInt(obj,SLOT_B)
+		
+		create_console_msg(text,"",True,r,g,b)
+		
+		SetGNetString(obj,SLOT_CHAT,"")
+	Next
+	SetColor 255,255,255
+
+EndFunction
+
 
 Function init()
 	create_console_msg("BEGIN LOG")
@@ -167,20 +188,23 @@ Function player_draw()
 		Local g:Int = GetGNetInt(obj,SLOT_G)
 		Local b:Int = GetGNetInt(obj,SLOT_B)
 	
-		Local text:String = GetGNetString(obj,SLOT_CHAT)
 		
 		SetRotation rot
 		
 		SetColor r,g,b
 		DrawImage char_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
+		SetColor 255,255,255
+		
+		DrawImage eyes_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
+		DrawImage smile1_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
+		
+		SetColor r,g,b
 		
 		SetRotation 0
 		SetImageFont Null
 		DrawText name,(xoffset-xp)*zoom+w/2-(TextWidth(name)*zoom)/2,(yoffset-yp)*zoom+h/2-(TextHeight(name)*zoom*2)
 		
-		create_console_msg(text)
 		
-		SetGNetString(obj,SLOT_CHAT,"")
 	Next
 	SetColor 255,255,255
 EndFunction
@@ -191,11 +215,11 @@ EndFunction
 
 Function player_control()
 	If canmove Then
-		If KeyDown(KEY_O) And zoom > 1/3.0 Then
+		If KeyDown(KEY_O) And zoom > 1/1.25 Then
 			zoom = zoom * 0.99
 		EndIf
 		
-		If KeyDown(KEY_I) And zoom < 4 Then
+		If KeyDown(KEY_I) And zoom < 4.5 Then
 			zoom = zoom / 0.99
 		EndIf
 		

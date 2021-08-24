@@ -19,7 +19,39 @@ Type button
 	Field clicked
 EndType
 
+Type window
+	Field x
+	Field y
+	Field width
+	Field height
+	Field title:String
+	Field visible
+	
+	Field children:TList
+EndType
+
+
 Global button_list:TList = New TList
+Global window_list:TList = New TList
+
+
+Global option_window:window = New window
+option_window.x = 180
+option_window.y = 150
+option_window.width = 300
+option_window.height = 400
+option_window.title = "Settings"
+
+window_list.addlast(option_window)
+
+Global server_window:window = New window
+server_window.x = 180
+server_window.y = 150
+server_window.width = 300
+server_window.height = 400
+server_window.title = "Multiplayer Servers"
+
+window_list.addlast(server_window)
 
 
 Global playbutton:button = New button
@@ -32,19 +64,32 @@ playbutton.active = True
 
 button_list.addlast(playbutton)
 
+
+Global multiplayer:button = New button
+multiplayer.x = 10
+multiplayer.y = 230
+multiplayer.t = "Join Server"
+multiplayer.width = TextWidth(playbutton.t)+30
+multiplayer.height = TextHeight(playbutton.t)+4
+multiplayer.active = True
+
+button_list.addlast(multiplayer)
+
+
 Global options:button = New button
 options.x = 10
-options.y = 230
-options.t = "Options"
+options.y = 260
+options.t = "Settings"
 options.width = TextWidth(playbutton.t)+30
 options.height = TextHeight(playbutton.t)+4
 options.active = True
 
 button_list.addlast(options)
 
+
 Global exitbutton:button = New button
 exitbutton.x = 10
-exitbutton.y = 260
+exitbutton.y = 290
 exitbutton.t = "Exit"
 exitbutton.width = TextWidth(playbutton.t)+30
 exitbutton.height = TextHeight(playbutton.t)+4
@@ -54,8 +99,6 @@ button_list.addlast(exitbutton)
 
 
 Global mousestate = 0
-Global optionsOpen = False
-
 
 SetClsColor 135,206,250
 
@@ -72,12 +115,9 @@ While Not menuExited
 	DrawImage title_img,titlescale*ImageWidth(title_img)/2,titlescale*ImageHeight(title_img)/2
 	SetScale 1,1
 		
-	handle_menu_buttons
+	handle_menu_buttons()
 	
-	
-	
-	If optionsOpen Then options_handler()
-	
+	handlewindows()
 	
 	If MouseHit(1) Then FlushMouse()
 	
@@ -94,10 +134,32 @@ While Not menuExited
 Wend
 
 optionsOpen = False
+multiplayerOpen = False
 
-Function options_handler()
-	DrawRect 64,64,100,100
+Function handlewindows()
+	For win:window = EachIn window_list
+		If win.visible Then 
+			DrawRect2 win.x,win.y,win.width,win.height,3, 128,128,128
+			
+			SetImageFont font2
+			SetColor 180,180,180
+			DrawText win.title,win.x+win.width/2-TextWidth(win.title)/2,win.y+3
+			SetImageFont font
+		EndIf
+	Next
 EndFunction
+
+Function DrawRect2(x1,y1,w1,h1,thickness = 2,red = 255, green = 255, blue = 255)
+	SetColor red,green,blue
+	DrawRect x1,y1,w1,h1
+	
+	SetColor 255,255,255
+	DrawRect x1,y1,thickness,h1
+	DrawRect x1,y1,w1,thickness
+	DrawRect x1,y1+h1-thickness,w1,thickness
+	DrawRect x1+w1-thickness,y1,thickness,h1
+EndFunction
+
 
 Function handle_menu_buttons()
 	For b:button = EachIn button_list
@@ -123,15 +185,24 @@ Function handle_menu_buttons()
 	If playbutton.clicked = True Then
 		playbutton.clicked = False
 		menuExited = True
+		
+	EndIf
+
+	If multiplayer.clicked = True Then
+		multiplayer.clicked = False
+		server_window.visible = Not server_window.visible
+		option_window.visible = False		
 	EndIf
 	
 	If options.clicked = True Then
 		options.clicked = False
-		optionsOpen = True
+		option_window.visible = Not option_window.visible
+		server_window.visible = False	
 	EndIf
 	
 	If exitbutton.clicked = True Then
 		End
+		
 	EndIf
 	
 EndFunction
