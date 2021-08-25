@@ -159,8 +159,6 @@ Function consolecommands()
 							cmd_type = "success"					
 						EndIf
 					EndIf
-				
-				
 				Case "/setname"
 						If Len(parsetext(lastcmd,2)) < 20 Then
 							

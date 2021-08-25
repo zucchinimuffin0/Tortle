@@ -23,15 +23,24 @@ Global title_img:TImage = LoadImage2:TImage("assets\title.png")
 Global unknown_img:TImage = LoadImage2:TImage("assets\tile\missing.png")
 
 Global char_img:TImage = LoadImage2:TImage("assets\character\character.png")
-Global eyes_img:TImage = LoadImage2:TImage("assets\character\eyes.png")
+Global eyes0_img:TImage = LoadImage2:TImage("assets\character\eyes0.png")
+Global eyes1_img:TImage = LoadImage2:TImage("assets\character\eyes1.png")
+Global eyes2_img:TImage = LoadImage2:TImage("assets\character\eyes2.png")
+Global eyes3_img:TImage = LoadImage2:TImage("assets\character\eyes3.png")
+
+
 
 Global smile0_img:TImage = LoadImage2:TImage("assets\character\smile0.png")
 Global smile1_img:TImage = LoadImage2:TImage("assets\character\smile1.png")
+Global smile2_img:TImage = LoadImage2:TImage("assets\character\smile2.png")
+Global smile3_img:TImage = LoadImage2:TImage("assets\character\smile3.png")
 
 
 Global button_img:TImage = LoadImage2:TImage("assets\button.png")
 
+Global tester_img:TImage = LoadImage2:TImage("assets\tester.png")
 
+AutoMidHandle False
 
 Global cursor1_img:TImage = LoadImage2:TImage("assets\cursor1.png")
 SetImageHandle cursor1_img,0,0
@@ -41,7 +50,6 @@ Global cursor2_img:TImage = LoadImage2:TImage("assets\cursor2.png")
 Global cursor3_img:TImage = LoadImage2:TImage("assets\cursor3.png")
 SetImageHandle cursor3_img,6,0
 
-Global tester_img:TImage = LoadImage2:TImage("assets\tester.png")
 
 Global font = LoadImageFont2("assets\font\Deadly Advance.ttf",14)
 

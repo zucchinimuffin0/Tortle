@@ -21,9 +21,12 @@ Global friction:Float = 0.91
 Global plr_angle:Float = 0
 Global angular_v:Float = 0.0
 
+Global plr_eyes = 0
+Global plr_mouth = 0
+
 Global plr_name:String = ""
 
-Global canmove = False
+Global canmove = True
 
 Global frame:Float = 0
 Global dir = 0
@@ -37,6 +40,8 @@ Global mouseshown = True
 Global plr_R = 255
 Global plr_G = 255
 Global plr_B = 255
+
+Global paused = False
 
 ''------
 Global GAMEPORT=31415
@@ -54,10 +59,28 @@ Const SLOT_R = 9
 Const SLOT_G = 10
 Const SLOT_B = 11
 Const SLOT_MAP = 12
+Const SLOT_EYES = 13
+Const SLOT_MOUTH = 14
 
 Global host:TGNetHost=CreateGNetHost()
 
 Global localPlayer:TGNetObject=CreateGNetObject(host)
+
+
+Include "console.bmx"
+
+init()
+
+Include "loadfiles.bmx"
+
+Include "mainmenu.bmx"
+
+plr_name = name_selected
+plr_r = selected_r
+plr_g = selected_g
+plr_b = selected_b
+plr_eyes = eyes_selected
+plr_mouth = smile_selected
 
 SetGNetString localPlayer,SLOT_NAME,plr_name
 SetGNetString localPlayer,SLOT_CHAT,""
@@ -70,14 +93,8 @@ SetGNetInt localPlayer,SLOT_R,plr_r
 SetGNetInt localPlayer,SLOT_G,plr_g
 SetGNetInt localPlayer,SLOT_B,plr_b
 
-
-Include "console.bmx"
-
-init()
-
-Include "loadfiles.bmx"
-
-Include "mainmenu.bmx"
+SetGNetInt localPlayer,SLOT_EYES,plr_eyes
+SetGNetInt localPlayer,SLOT_MOUTH,plr_mouth
 
 
 Global mapsizex = 32
@@ -102,7 +119,7 @@ Next
 ''Global curmap[mapsizex,mapsizey]
 SetImageFont font2
 
-While Not KeyDown(KEY_ESCAPE)
+Repeat
 	Cls
 	
 	mousestate = 0
@@ -129,8 +146,64 @@ While Not KeyDown(KEY_ESCAPE)
 	GNetSync host
 
 	
-	player_control()
+	If KeyHit(KEY_ESCAPE) Then paused = Not paused
+	
+	If paused Then
+		canmove = False
+		SetImageFont font
+		resume_game.active = True
+		multiplayer.active = True
+		exitbutton.active = True
+		options.active = True
+		chareditor.active = True
+	
+	
+		handlewindows()
+		handle_menu_buttons()
+	
+		If editor_window.visible Then 
+			character_editor()
+			left_smile.active = True		
+			right_smile.active = True
+			left_eyes.active = True		
+			right_eyes.active = True
+			
+			plr_eyes = eyes_selected
+			plr_mouth = smile_selected
+			
+			SetGNetInt localPlayer,SLOT_EYES,plr_eyes
+			SetGNetInt localPlayer,SLOT_MOUTH,plr_mouth
+			
+		Else
+			left_smile.active = False
+			right_smile.active = False
+			left_eyes.active = False		
+			right_eyes.active = False
+		EndIf
+		SetImageFont Null
+	Else
+		resume_game.active = False
+		multiplayer.active = False
+		exitbutton.active = False
+		options.active = False
+		chareditor.active = False
 
+
+		left_smile.active = False
+		right_smile.active = False
+		left_eyes.active = False		
+		right_eyes.active = False
+
+		
+		editor_window.visible = False
+		server_window.visible = False
+		option_window.visible = False
+	EndIf
+	
+	player_control()
+	
+	If MouseHit(1) Then FlushMouse()
+	
 	SetScale 1,1
 	Select mousestate
 		Case 0
@@ -143,7 +216,7 @@ While Not KeyDown(KEY_ESCAPE)
 	
 	SetScale zoom,zoom
 	Flip
-Wend
+Forever
 
 CloseGNetHost host
 
@@ -152,7 +225,7 @@ End
 Function Chat()
 	For Local obj:TGNetObject=EachIn GNetObjects(host)
 		If obj.State()=GNET_CLOSED Continue
-			
+					
 		Local text:String = GetGNetString(obj,SLOT_CHAT)
 	
 		Local r:Int = GetGNetInt(obj,SLOT_R)
@@ -187,22 +260,48 @@ Function player_draw()
 		Local r:Int = GetGNetInt(obj,SLOT_R)
 		Local g:Int = GetGNetInt(obj,SLOT_G)
 		Local b:Int = GetGNetInt(obj,SLOT_B)
+		Local eye:Int = GetGNetInt(obj,SLOT_EYES)
+		Local mouth:Int = GetGNetInt(obj,SLOT_MOUTH)
 	
 		
 		SetRotation rot
 		
+		Local plrX:Float = (xoffset-xp)*zoom+w/2
+		Local plrY:Float = (yoffset-yp)*zoom+h/2
+
 		SetColor r,g,b
-		DrawImage char_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
+		DrawImage char_img,plrX,plrY
 		SetColor 255,255,255
 		
-		DrawImage eyes_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
-		DrawImage smile1_img,(xoffset-xp)*zoom+w/2,(yoffset-yp)*zoom+h/2
+		
+		Select eye
+			Case 0
+				DrawImage eyes0_img,plrX,plrY
+			Case 1
+				DrawImage eyes1_img,plrX,plrY
+			Case 2
+				DrawImage eyes2_img,plrX,plrY
+			Case 3
+				DrawImage eyes3_img,plrX,plrY
+		EndSelect
+		
+		Select mouth
+			Case 0
+				DrawImage smile0_img,plrX,plrY
+			Case 1
+				DrawImage smile1_img,plrX,plrY
+			Case 2
+				DrawImage smile2_img,plrX,plrY
+			Case 3
+				DrawImage smile3_img,plrX,plrY
+		EndSelect
+		
 		
 		SetColor r,g,b
 		
 		SetRotation 0
 		SetImageFont Null
-		DrawText name,(xoffset-xp)*zoom+w/2-(TextWidth(name)*zoom)/2,(yoffset-yp)*zoom+h/2-(TextHeight(name)*zoom*2)
+		DrawText name,plrX-(TextWidth(name)*zoom)/2,plrY-(TextHeight(name)*zoom*2)
 		
 		
 	Next
@@ -277,13 +376,13 @@ Function player_control()
 	''SetGNetFloat localPlayer,SLOT_AV,angular_v
 	SetGNetFloat localPlayer,SLOT_ROT,plr_angle
 
-	Select dir
-		Case 0
-			If frame >= 4 Then frame = 0
-		Default
-			If frame > 8 Then frame = 4
-			If frame <= 4 Then frame = 4
-	EndSelect
+	''Select dir
+	''	Case 0
+	''		If frame >= 4 Then frame = 0
+	''	Default
+	''		If frame > 8 Then frame = 4
+	''		If frame <= 4 Then frame = 4
+	''EndSelect
 EndFunction
 
 Function drawCurrentMap()

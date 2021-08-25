@@ -37,7 +37,7 @@ Function ParseText:String(txt:String,n:Int)
 	Return temp[n-1]
 EndFunction
 
-Function create_console_msg(t:String,cmd_type:String = "",c = False, r = 255,g = 255,b = 255)
+Function create_console_msg(t:String,cmd_type:String = "",c = False, r = 255,g = 255,blue = 255)
 	If Len(t) <> 0 Then
 		For Local q:consolechat = EachIn consolelist
 			q.y = q.y - 15
@@ -74,7 +74,7 @@ Function create_console_msg(t:String,cmd_type:String = "",c = False, r = 255,g =
 		Else
 			b.r = r
 			b.g = g
-			b.b = b
+			b.b = blue
 		EndIf
 				
 		consolelist.addlast(b)
@@ -158,6 +158,13 @@ Function consolecommands()
 							response = "Connected to server "+parsetext(lastcmd,2)+" at port "+parsetext(lastcmd,3)
 							cmd_type = "success"					
 						EndIf
+					EndIf
+				
+				Case "/disconnect"
+					
+					If args = 1 Then
+						CloseGNetHost(host)
+						
 					EndIf
 				
 				
