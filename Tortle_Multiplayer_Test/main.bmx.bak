@@ -8,6 +8,8 @@ AppTitle = "Tortle 1.0"
 
 Graphics w,h,0
 
+SeedRnd MilliSecs()
+
 ''player variables
 Global xoffset:Float = 0.0
 Global yoffset:Float = 0.0
@@ -37,7 +39,7 @@ Global zoom:Float = 2
 
 Global mouseshown = True
 
-Global plr_R = 255
+Global plr_R = 0
 Global plr_G = 255
 Global plr_B = 255
 
@@ -45,6 +47,11 @@ Global paused = False
 
 ''------
 Global GAMEPORT=31415
+
+Type weapon
+	Field x
+	Field y
+EndType 
 
 Const SLOT_TYPE=0
 Const SLOT_NAME=1
@@ -132,7 +139,7 @@ Repeat
 		consoleopen = Not consoleopen
 	EndIf
 
-	player_draw()
+	''player_draw()
 
 		
 	If consoleopen Then
@@ -146,7 +153,7 @@ Repeat
 	GNetSync host
 
 	
-	If KeyHit(KEY_ESCAPE) Then paused = Not paused
+	If KeyHit(KEY_ESCAPE) Then paused = Not paused;FlushMouse()
 	
 	If paused Then
 		canmove = False
@@ -160,6 +167,7 @@ Repeat
 	
 		handlewindows()
 		handle_menu_buttons()
+		handle_sliders()
 	
 		If editor_window.visible Then 
 			character_editor()
@@ -171,14 +179,31 @@ Repeat
 			plr_eyes = eyes_selected
 			plr_mouth = smile_selected
 			
+			plr_r = selected_r
+			plr_g = selected_g
+			plr_b = selected_b
+			
+			red_slider.visible = True
+			green_slider.visible = True
+			blue_slider.visible = True
+
+			
 			SetGNetInt localPlayer,SLOT_EYES,plr_eyes
 			SetGNetInt localPlayer,SLOT_MOUTH,plr_mouth
+			
+			SetGNetInt localPlayer,SLOT_R,plr_r
+			SetGNetInt localPlayer,SLOT_G,plr_g
+			SetGNetInt localPlayer,SLOT_B,plr_b
 			
 		Else
 			left_smile.active = False
 			right_smile.active = False
 			left_eyes.active = False		
 			right_eyes.active = False
+
+			red_slider.visible = False
+			green_slider.visible = False
+			blue_slider.visible = False
 		EndIf
 		SetImageFont Null
 	Else
@@ -198,11 +223,13 @@ Repeat
 		editor_window.visible = False
 		server_window.visible = False
 		option_window.visible = False
+		
+		red_slider.visible = False
+		green_slider.visible = False
+		blue_slider.visible = False
 	EndIf
 	
 	player_control()
-	
-	If MouseHit(1) Then FlushMouse()
 	
 	SetScale 1,1
 	Select mousestate
@@ -224,10 +251,8 @@ End
 
 Function Chat()
 	For Local obj:TGNetObject=EachIn GNetObjects(host)
-		If obj.State()=GNET_CLOSED Then
-			SetGNetString(localhost,SLOT_CHAT,"Player has left the server")
-		EndIf
-			
+		If obj.State()=GNET_CLOSED Continue
+					
 		Local text:String = GetGNetString(obj,SLOT_CHAT)
 	
 		Local r:Int = GetGNetInt(obj,SLOT_R)
@@ -285,6 +310,8 @@ Function player_draw()
 				DrawImage eyes2_img,plrX,plrY
 			Case 3
 				DrawImage eyes3_img,plrX,plrY
+			Case 4
+				DrawImage eyes4_img,plrX,plrY
 		EndSelect
 		
 		Select mouth
@@ -296,6 +323,8 @@ Function player_draw()
 				DrawImage smile2_img,plrX,plrY
 			Case 3
 				DrawImage smile3_img,plrX,plrY
+			Case 4
+				DrawImage smile4_img,plrX,plrY
 		EndSelect
 		
 		
@@ -435,19 +464,32 @@ Function drawCurrentMap()
 					Default
 						DrawImage unknown_img,xpos,ypos
 				EndSelect
-								
+			EndIf	
+		Next
+	Next
+	
+	player_draw
+	
+	For x = 0 To mapsizex-1
+		For y = 0 To mapsizey-1
+			
+			Local xpos1:Float = (x*32+xoffset-w/2)*zoom+w/2
+			Local ypos1:Float = (y*32+yoffset-h/2)*zoom+h/2
+			
+			If xpos1 < w+16*zoom And xpos1 > -16*zoom And ypos1 < h+16*zoom And ypos1 > -16*zoom Then		
 				Select curstuff[x,y]
 					Case 0
 					Case 1
-						DrawImage bush_img,xpos,ypos
+						DrawImage bush_img,xpos1,ypos1
 					Case 2
-						DrawImage tree_trunk_img,xpos,ypos
+						DrawImage tree_trunk_img,xpos1,ypos1
 					Case 3
-						DrawImage tree_trunk_top_img,xpos,ypos				
+						DrawImage tree_trunk_top_img,xpos1,ypos1				
 					Default
-						DrawImage unknown_img,xpos,ypos
+						DrawImage unknown_img,xpos1,ypos1
 				EndSelect
 			EndIf	
 		Next
 	Next
+
 EndFunction

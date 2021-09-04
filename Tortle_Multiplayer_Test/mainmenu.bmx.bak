@@ -25,14 +25,25 @@ Type window
 	Field width
 	Field height
 	Field title:String
-	Field visible
-	
-	Field children:TList
+	Field visible	
 EndType
 
+Type slider
+	Field x
+	Field y
+	Field width
+	Field height
+	Field slider_x
+	Field slider_y
+	Field dragging
+	Field visible
+EndType
 
 Global button_list:TList = New TList
 Global window_list:TList = New TList
+Global slider_list:TList = New TList
+
+
 
 
 Global option_window:window = New window
@@ -128,9 +139,43 @@ Global smile_selected = 0
 Global eyes_selected = 0
 Global name_selected:String = "Player"
 
-Global selected_r = 255
-Global selected_g = 255
-Global selected_b = 255
+Global selected_r = Rand(0,255)
+Global selected_g = Rand(0,255)
+Global selected_b = Rand(0,255)
+
+
+Global red_slider:slider = New slider
+red_slider.x = editor_window.x+5
+red_slider.y = editor_window.y+35
+red_slider.width = 270
+red_slider.height = 15
+red_slider.visible = False
+red_slider.slider_x = red_slider.x+selected_r
+
+slider_list.addlast(red_slider)
+
+Global green_slider:slider = New slider
+green_slider.x = editor_window.x+5
+green_slider.y = editor_window.y+70
+green_slider.width = 270
+green_slider.height = 15
+green_slider.visible = False
+green_slider.slider_x = green_slider.x+selected_g
+
+slider_list.addlast(green_slider)
+
+Global blue_slider:slider = New slider
+blue_slider.x = editor_window.x+5
+blue_slider.y = editor_window.y+105
+blue_slider.width = 270
+blue_slider.height = 15
+blue_slider.visible = False
+blue_slider.slider_x = blue_slider.x+selected_b
+
+slider_list.addlast(blue_slider)
+
+
+
 
 Global left_smile:button = New button
 left_smile.t = "<"
@@ -185,7 +230,7 @@ resume_game.active = False
 button_list.addlast(resume_game)
 
 
-
+''========================
 While Not menuExited
 	Cls
 	mousestate = 0
@@ -200,6 +245,7 @@ While Not menuExited
 	
 	handlewindows()
 	handle_menu_buttons()
+	handle_sliders()
 	
 	If editor_window.visible Then 
 		character_editor()
@@ -207,15 +253,21 @@ While Not menuExited
 		right_smile.active = True
 		left_eyes.active = True		
 		right_eyes.active = True
-
+		
+		red_slider.visible = True
+		green_slider.visible = True
+		blue_slider.visible = True
 	Else
 		left_smile.active = False
 		right_smile.active = False
 		left_eyes.active = False		
 		right_eyes.active = False
+
+		red_slider.visible = False
+		green_slider.visible = False
+		blue_slider.visible = False
 	EndIf
 	
-	If MouseHit(1) Then FlushMouse()
 	
 	Select mousestate
 		Case 0
@@ -229,6 +281,7 @@ While Not menuExited
 	
 	Flip
 Wend
+''========================
 
 editor_window.visible = False
 server_window.visible = False
@@ -240,6 +293,51 @@ exitbutton.active = False
 options.active = False
 chareditor.active = False
 
+
+
+Function handle_sliders()
+	For s:slider = EachIn slider_list
+		s.dragging = False
+		
+		If s.visible Then 
+
+			DrawRect2 s.x,s.y,s.width,s.height,3,150,150,150
+			
+			SetColor 200,200,200
+			DrawOval s.slider_x,s.y,15,15
+			
+			If mouseinrect(s.slider_x,s.y,15,15) Then
+				mousestate = 2
+				
+				If MouseDown(1) Then
+					s.dragging = True
+				EndIf
+			EndIf
+			
+			If s.dragging Then
+				s.slider_x = MouseX()-7
+			EndIf
+			
+			If s.slider_x > s.x+s.width-15 Then s.slider_x = s.x+s.width-15
+			If s.slider_x < s.x Then s.slider_x = s.x
+		EndIf
+	Next
+	
+	
+	If red_slider.dragging Then
+		selected_r = red_slider.slider_x-red_slider.x
+	EndIf
+	
+	If green_slider.dragging Then
+		selected_g = green_slider.slider_x-green_slider.x
+	EndIf
+
+	If blue_slider.dragging Then
+		selected_b = blue_slider.slider_x-blue_slider.x
+	EndIf
+
+EndFunction
+
 Function character_editor()
 	Local winX = editor_window.x+editor_window.width/2
 	Local winY = editor_window.y+editor_window.height/2
@@ -248,7 +346,9 @@ Function character_editor()
 	SetScale 5,5
 	SetColor selected_r,selected_g,selected_b
 	DrawImage char_img,winX,winY
-		
+
+	SetColor 255,255,255
+
 	Select smile_selected
 		Case 0
 			DrawImage smile0_img,winX,winY
@@ -257,10 +357,10 @@ Function character_editor()
 		Case 2
 			DrawImage smile2_img,winX,winY	
 		Case 3
-			DrawImage smile3_img,winX,winY	
+			DrawImage smile3_img,winX,winY
+		Case 4
+			DrawImage smile4_img,winX,winY	
 	EndSelect
-	
-	SetColor 255,255,255
 
 	Select eyes_selected
 		Case 0
@@ -271,6 +371,8 @@ Function character_editor()
 			DrawImage eyes2_img,winX,winY	
 		Case 3
 			DrawImage eyes3_img,winX,winY
+		Case 4
+			DrawImage eyes4_img,winX,winY
 	EndSelect
 	
 	
@@ -308,23 +410,24 @@ Function handle_menu_buttons()
 	SetScale 1,1
 	For b:button = EachIn button_list
 		If b.active Then
-			If mouseinrect(b.x,b.y,b.width,b.height) And b.active = True Then
+			If mouseinrect(b.x,b.y,b.width,b.height) Then
 				drawrect2 b.x,b.y,b.width,b.height,3,110,110,110
 	
 				mousestate = 2
 				
-				If MouseHit(1) Then
+				If MouseDown(1) Then
 					b.clicked = True
+					FlushMouse()
 				EndIf
 			Else
 				drawrect2 b.x,b.y,b.width,b.height,3,180,180,180
 			EndIf
-					
-			
+
 			SetColor 150,150,150
 			DrawText b.t,b.x+8,b.y+2
 		EndIf
 	Next
+	
 	
 	
 	If playbutton.clicked = True Then
@@ -358,7 +461,6 @@ Function handle_menu_buttons()
 	EndIf
 	
 	If exitbutton.clicked = True Then
-		SetGNetString(localhost,SLOT_CHAT,"Left the server")
 		CloseGNetHost host
 
 		End
@@ -371,7 +473,7 @@ Function handle_menu_buttons()
 		
 		smile_selected = smile_selected - 1
 		
-		If smile_selected < 0 Then smile_selected = 3
+		If smile_selected < 0 Then smile_selected = 4
 		
 	EndIf
 
@@ -380,7 +482,7 @@ Function handle_menu_buttons()
 		
 		smile_selected = smile_selected + 1
 		
-		If smile_selected > 3 Then smile_selected = 0
+		If smile_selected > 4 Then smile_selected = 0
 		
 	EndIf
 
@@ -389,7 +491,7 @@ Function handle_menu_buttons()
 		
 		eyes_selected = eyes_selected - 1
 		
-		If eyes_selected < 0 Then eyes_selected = 3
+		If eyes_selected < 0 Then eyes_selected = 4
 		
 	EndIf
 
@@ -398,7 +500,7 @@ Function handle_menu_buttons()
 		
 		eyes_selected = eyes_selected + 1
 		
-		If eyes_selected > 3 Then eyes_selected = 0
+		If eyes_selected > 4 Then eyes_selected = 0
 		
 	EndIf
 	

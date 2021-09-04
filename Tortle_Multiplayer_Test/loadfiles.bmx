@@ -1,4 +1,4 @@
-AutoImageFlags MIPMAPPEDIMAGE|MASKEDIMAGED
+AutoImageFlags MIPMAPPEDIMAGE
 AutoMidHandle True 
 
 
@@ -12,6 +12,10 @@ Global water_img:TImage = LoadAnimImage2:TImage("assets\tile\water.png",32,32,0,
 
 Global sand_img:TImage = LoadImage2:TImage("assets\tile\sand.png")
 Global path_img:TImage = LoadImage2:TImage("assets\tile\path.png")
+
+Global path_up_img:TImage = LoadImage2:TImage("assets\tile\path_up.png")
+
+
 Global spawn_img:TImage = LoadImage2:TImage("assets\tile\spawn.png")
 
 Global bush_img:TImage = LoadImage2:TImage("assets\tile\bush.png")
@@ -27,6 +31,7 @@ Global eyes0_img:TImage = LoadImage2:TImage("assets\character\eyes0.png")
 Global eyes1_img:TImage = LoadImage2:TImage("assets\character\eyes1.png")
 Global eyes2_img:TImage = LoadImage2:TImage("assets\character\eyes2.png")
 Global eyes3_img:TImage = LoadImage2:TImage("assets\character\eyes3.png")
+Global eyes4_img:TImage = LoadImage2:TImage("assets\character\eyes4.png")
 
 
 
@@ -34,6 +39,10 @@ Global smile0_img:TImage = LoadImage2:TImage("assets\character\smile0.png")
 Global smile1_img:TImage = LoadImage2:TImage("assets\character\smile1.png")
 Global smile2_img:TImage = LoadImage2:TImage("assets\character\smile2.png")
 Global smile3_img:TImage = LoadImage2:TImage("assets\character\smile3.png")
+Global smile4_img:TImage = LoadImage2:TImage("assets\character\smile4.png")
+
+
+Global gun_img:TImage = LoadImage2:TImage("assets\item\gun.png")
 
 
 Global button_img:TImage = LoadImage2:TImage("assets\button.png")
