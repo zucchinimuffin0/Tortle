@@ -1,10 +1,13 @@
 Import BRL.GNet
 Import BRL.BASIC
 
+Import "bbtype.bmx"
+Import "bbvkey.bmx"
+
 Global w = 800
 Global h = 600
 
-AppTitle = "Tortle 1.0"
+AppTitle = "Fish Out of Water 1.0"
 
 Graphics w,h,0
 
@@ -17,14 +20,21 @@ Global yoffset:Float = 0.0
 Global xvel:Float = 0.0
 Global yvel:Float = 0.0
 
-Global accel:Float = 0.2
+Global accel:Float = 0.1
 Global friction:Float = 0.91
+
 
 Global plr_angle:Float = 0
 Global angular_v:Float = 0.0
 
 Global plr_eyes = 0
 Global plr_mouth = 0
+
+
+Global HP:Float = 100
+Global Thirst:Float = 100
+Global Hunger:Float = 100
+
 
 Global plr_name:String = ""
 
@@ -48,10 +58,6 @@ Global paused = False
 ''------
 Global GAMEPORT=31415
 
-Type weapon
-	Field x
-	Field y
-EndType 
 
 Const SLOT_TYPE=0
 Const SLOT_NAME=1
@@ -68,6 +74,7 @@ Const SLOT_B = 11
 Const SLOT_MAP = 12
 Const SLOT_EYES = 13
 Const SLOT_MOUTH = 14
+Const SLOT_ANIMFRAME = 15
 
 Global host:TGNetHost=CreateGNetHost()
 
@@ -81,6 +88,8 @@ init()
 Include "loadfiles.bmx"
 
 Include "mainmenu.bmx"
+
+Include "inventory.bmx"
 
 plr_name = name_selected
 plr_r = selected_r
@@ -112,6 +121,11 @@ Global curstuff:Int[,] = loadmap("assets\maps\lvl_1.stf")
 
 Global waterframe:Float = 0
 
+
+Global t0:Float
+Global t1:Float
+Global DT:Float
+
 For x = 0 To mapsizex-1
 	For y = 0 To mapsizey-1
 		If curmap[x,y] = 9 Then
@@ -127,14 +141,17 @@ Next
 SetImageFont font2
 
 Repeat
-	Cls
-	
+	t0 = MilliSecs()
+
+	Cls	
+
 	mousestate = 0
 	canmove = True
 	
 	drawCurrentMap()
+	''draw_item()
 	
-	If KeyHit(KEY_TILDE) Then 
+	If KeyHit(KEY_TILDE) Or KeyHit(41) Then 
 		FlushKeys()
 		consoleopen = Not consoleopen
 	EndIf
@@ -228,8 +245,11 @@ Repeat
 		green_slider.visible = False
 		blue_slider.visible = False
 	EndIf
-	
+		
 	player_control()
+	
+	
+	''draw_gui_elements()
 	
 	SetScale 1,1
 	Select mousestate
@@ -241,8 +261,19 @@ Repeat
 			DrawImage cursor3_img,MouseX(),MouseY()
 	EndSelect
 	
+		
 	SetScale zoom,zoom
+	
+	''DrawText dt,0,0
+	
 	Flip
+	
+	t1 = MilliSecs()
+	
+	dt = (t1 - t0)*0.001
+
+	
+	
 Forever
 
 CloseGNetHost host
@@ -297,7 +328,7 @@ Function player_draw()
 		Local plrY:Float = (yoffset-yp)*zoom+h/2
 
 		SetColor r,g,b
-		DrawImage char_img,plrX,plrY
+		DrawImage char_img,plrX,plrY,frame
 		SetColor 255,255,255
 		
 		
@@ -345,6 +376,25 @@ EndFunction
 
 Function player_control()
 	If canmove Then
+		
+		If KeyDown(KEY_1) Then
+			inventory_selected = 0
+		ElseIf KeyDown(KEY_2) Then
+			inventory_selected = 1
+		ElseIf KeyDown(KEY_3) Then
+			inventory_selected = 2
+		ElseIf KeyDown(KEY_4) Then
+			inventory_selected = 3
+		ElseIf KeyDown(KEY_5) Then
+			inventory_selected = 4
+		ElseIf KeyDown(KEY_6) Then
+			inventory_selected = 5
+		ElseIf KeyDown(KEY_7) Then
+			inventory_selected = 6
+		ElseIf KeyDown(KEY_8) Then
+			inventory_selected = 7						
+		EndIf
+	
 		If KeyDown(KEY_O) And zoom > 1/1.25 Then
 			zoom = zoom * 0.99
 		EndIf
@@ -354,11 +404,11 @@ Function player_control()
 		EndIf
 		
 		If mouselocked Then
-			If KeyDown(KEY_A) Then
-				angular_v = angular_v - accel
+			If KeyDown(KEY_A) Or KeyDown(KEY_LEFT) Then
+				angular_v = angular_v - accel''*dt
 			EndIf
-			If KeyDown(KEY_D) Then
-				angular_v = angular_v + accel
+			If KeyDown(KEY_D) Or KeyDown(KEY_RIGHT) Then
+				angular_v = angular_v + accel''*dt
 			EndIf			
 		Else
 			mousestate = 1
@@ -367,18 +417,19 @@ Function player_control()
 		EndIf
 		
 		
-		If KeyDown(KEY_W) Then
-			yvel = yvel + accel*Sin(plr_angle)
-			xvel = xvel + accel*Cos(plr_angle)
-			
+		If KeyDown(KEY_W) Or KeyDown(KEY_UP) Then
+			yvel = yvel + accel*Sin(plr_angle)''*dt
+			xvel = xvel + accel*Cos(plr_angle)''*dt
+			frame = frame + accel''*dt
 		EndIf
-		If KeyDown(KEY_S) Then
-			yvel = yvel - accel*Sin(plr_angle)
-			xvel = xvel - accel*Cos(plr_angle)			
+		If KeyDown(KEY_S) Or KeyDown(KEY_DOWN) Then
+			yvel = yvel - accel*Sin(plr_angle)''*dt
+			xvel = xvel - accel*Cos(plr_angle)''*dt
+			frame = frame + accel''*dt	
 		EndIf
 		
 		
-		If Not KeyDown(KEY_W) And Not KeyDown(KEY_A) And Not KeyDown(KEY_S) And Not KeyDown(KEY_D) Then
+		If Not KeyDown(KEY_W) And Not KeyDown(KEY_A) And Not KeyDown(KEY_S) And Not KeyDown(KEY_D) And Not KeyDown(KEY_UP) And Not KeyDown(KEY_LEFT) And Not KeyDown(KEY_DOWN) And Not KeyDown(KEY_RIGHT)  Then
 			frame = 0
 		EndIf
 		
@@ -388,15 +439,15 @@ Function player_control()
 		EndIf
 	EndIf
 	
-	xoffset = xoffset + xvel
-	yoffset = yoffset + yvel
+	xoffset = xoffset + xvel''*dt
+	yoffset = yoffset + yvel''*dt
 
-	plr_angle = plr_angle + angular_v
+	plr_angle = plr_angle + angular_v''*dt
 	
-	xvel = xvel * friction
-	yvel = yvel * friction
+	xvel = xvel * friction''*dt
+	yvel = yvel * friction''*dt
 	
-	angular_v = angular_v * friction
+	angular_v = angular_v * friction''*dt
 
 	''SetGNetFloat localPlayer,SLOT_VX,xvel
 	''SetGNetFloat localPlayer,SLOT_VY,yvel
@@ -406,6 +457,8 @@ Function player_control()
 	
 	''SetGNetFloat localPlayer,SLOT_AV,angular_v
 	SetGNetFloat localPlayer,SLOT_ROT,plr_angle
+	
+	If frame > 2 Then frame = 0
 
 	''Select dir
 	''	Case 0
@@ -415,6 +468,15 @@ Function player_control()
 	''		If frame <= 4 Then frame = 4
 	''EndSelect
 EndFunction
+
+
+
+
+Function Xor(a,b)
+	Return((a Or b)*Not(a = b))
+EndFunction
+
+
 
 Function drawCurrentMap()
 	waterframe = waterframe + 0.01

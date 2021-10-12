@@ -1,7 +1,7 @@
 AutoImageFlags MIPMAPPEDIMAGE
 AutoMidHandle True 
 
-
+SetBlend ALPHABLEND
 Global grass_img:TImage = LoadImage2:TImage("assets\tile\grass.png")
 Global grass_cc_img:TImage = LoadImage2:TImage("assets\tile\grass_concave.png")
 Global grass_cv_img:TImage = LoadImage2:TImage("assets\tile\grass_convex.png")
@@ -18,6 +18,11 @@ Global path_up_img:TImage = LoadImage2:TImage("assets\tile\path_up.png")
 
 Global spawn_img:TImage = LoadImage2:TImage("assets\tile\spawn.png")
 
+Global inventory_img:TImage = LoadImage2:TImage("assets\inventory.png",MASKEDIMAGE)
+
+SetImageHandle inventory_img,0,0
+
+
 Global bush_img:TImage = LoadImage2:TImage("assets\tile\bush.png")
 Global tree_trunk_img:TImage = LoadImage2:TImage("assets\tile\tree_trunk.png")
 Global tree_trunk_top_img:TImage = LoadImage2:TImage("assets\tile\tree_trunk_top.png")
@@ -26,7 +31,11 @@ Global title_img:TImage = LoadImage2:TImage("assets\title.png")
 
 Global unknown_img:TImage = LoadImage2:TImage("assets\tile\missing.png")
 
-Global char_img:TImage = LoadImage2:TImage("assets\character\character.png")
+Global weapon_img:TImage = LoadImage2:TImage("assets\item\gun.png")
+Global fruit_img:TImage = LoadImage2:TImage("assets\item\fruit.png")
+
+
+Global char_img:TImage = LoadAnimImage2:TImage("assets\character\character.png",28,18,0,2)
 Global eyes0_img:TImage = LoadImage2:TImage("assets\character\eyes0.png")
 Global eyes1_img:TImage = LoadImage2:TImage("assets\character\eyes1.png")
 Global eyes2_img:TImage = LoadImage2:TImage("assets\character\eyes2.png")

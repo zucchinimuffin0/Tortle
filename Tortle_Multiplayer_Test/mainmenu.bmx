@@ -44,8 +44,6 @@ Global window_list:TList = New TList
 Global slider_list:TList = New TList
 
 
-
-
 Global option_window:window = New window
 option_window.x = 180
 option_window.y = 150
@@ -296,11 +294,11 @@ exitbutton.active = False
 options.active = False
 chareditor.active = False
 
-
+FlushMouse()
+FlushKeys()
 
 Function handle_sliders()
 	For s:slider = EachIn slider_list
-		s.dragging = False
 		
 		If s.visible Then 
 
@@ -312,8 +310,8 @@ Function handle_sliders()
 			If mouseinrect(s.slider_x,s.y,15,15) Then
 				mousestate = 2
 				
-				If MouseDown(1) Then
-					s.dragging = True
+				If MouseHit(1) Then
+					s.dragging = Not s.dragging
 				EndIf
 			EndIf
 			

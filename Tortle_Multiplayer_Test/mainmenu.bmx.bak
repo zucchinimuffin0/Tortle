@@ -44,8 +44,6 @@ Global window_list:TList = New TList
 Global slider_list:TList = New TList
 
 
-
-
 Global option_window:window = New window
 option_window.x = 180
 option_window.y = 150
@@ -230,6 +228,9 @@ resume_game.active = False
 button_list.addlast(resume_game)
 
 
+Global smile_count = 4
+Global eyes_count = 4
+
 ''========================
 While Not menuExited
 	Cls
@@ -297,7 +298,6 @@ chareditor.active = False
 
 Function handle_sliders()
 	For s:slider = EachIn slider_list
-		s.dragging = False
 		
 		If s.visible Then 
 
@@ -309,8 +309,8 @@ Function handle_sliders()
 			If mouseinrect(s.slider_x,s.y,15,15) Then
 				mousestate = 2
 				
-				If MouseDown(1) Then
-					s.dragging = True
+				If MouseHit(1) Then
+					s.dragging = Not s.dragging
 				EndIf
 			EndIf
 			
@@ -473,7 +473,7 @@ Function handle_menu_buttons()
 		
 		smile_selected = smile_selected - 1
 		
-		If smile_selected < 0 Then smile_selected = 4
+		If smile_selected < 0 Then smile_selected = smile_count 
 		
 	EndIf
 
@@ -482,7 +482,7 @@ Function handle_menu_buttons()
 		
 		smile_selected = smile_selected + 1
 		
-		If smile_selected > 4 Then smile_selected = 0
+		If smile_selected > smile_count Then smile_selected = 0
 		
 	EndIf
 
@@ -491,7 +491,7 @@ Function handle_menu_buttons()
 		
 		eyes_selected = eyes_selected - 1
 		
-		If eyes_selected < 0 Then eyes_selected = 4
+		If eyes_selected < 0 Then eyes_selected = eyes_count
 		
 	EndIf
 
@@ -500,7 +500,7 @@ Function handle_menu_buttons()
 		
 		eyes_selected = eyes_selected + 1
 		
-		If eyes_selected > 4 Then eyes_selected = 0
+		If eyes_selected > eyes_count Then eyes_selected = 0
 		
 	EndIf
 	

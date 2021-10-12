@@ -332,5 +332,6 @@ Function console:String()
 		lastcmd = Trim((lastcmd))
 		
 		consolecommands()
+		consoleopen = False
 	EndIf	
 EndFunction
